@@ -7,6 +7,34 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- 结算画面遮罩 -->
+    <div class="result-overlay" id="resultOverlay" style="display: none;">
+        <div class="result-modal" id="resultModal">
+            <div class="result-content">
+                <div class="result-icon" id="resultIcon">🎉</div>
+                <h2 class="result-title" id="resultTitle">恭喜获胜！</h2>
+                <div class="result-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">你的得分</span>
+                        <span class="stat-value" id="finalPlayerScore">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">AI得分</span>
+                        <span class="stat-value" id="finalAiScore">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">平局</span>
+                        <span class="stat-value" id="finalDrawScore">0</span>
+                    </div>
+                </div>
+                <div class="result-actions">
+                    <button class="result-btn" id="playAgainBtn">再来一局</button>
+                    <button class="result-btn secondary" id="closeResultBtn">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <h1>🎮 AI猜拳游戏</h1>
@@ -15,12 +43,55 @@
 
         <div class="game-area">
             <!-- 视频区域 -->
-            <div class="video-container">
-                <video id="video" autoplay playsinline muted></video>
-                <canvas id="canvas"></canvas>
-                <div class="video-overlay">
-                    <div class="status-indicator" id="statusIndicator">
-                        <span>准备中...</span>
+            <div class="video-section">
+                <div class="video-container">
+                    <video id="video" autoplay playsinline muted></video>
+                    <canvas id="canvas"></canvas>
+                    <div class="video-overlay">
+                        <div class="status-indicator" id="statusIndicator">
+                            <span>准备中...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 难度选择 -->
+                <div class="difficulty-selector">
+                    <h4>选择难度</h4>
+                    <div class="difficulty-buttons">
+                        <button class="difficulty-btn" data-difficulty="easy">
+                            <span class="difficulty-icon">😊</span>
+                            <span class="difficulty-name">简单</span>
+                            <span class="difficulty-desc">AI完全随机</span>
+                        </button>
+                        <button class="difficulty-btn active" data-difficulty="medium">
+                            <span class="difficulty-icon">😐</span>
+                            <span class="difficulty-name">中等</span>
+                            <span class="difficulty-desc">AI 20%克制</span>
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="hard">
+                            <span class="difficulty-icon">😈</span>
+                            <span class="difficulty-name">困难</span>
+                            <span class="difficulty-desc">AI 40%克制</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 局数选择 -->
+                <div class="rounds-selector">
+                    <h4>游戏局数</h4>
+                    <div class="rounds-control">
+                        <button class="rounds-btn" id="decreaseRounds">-</button>
+                        <div class="rounds-display">
+                            <span id="roundsValue">5</span>
+                            <span class="rounds-label">局</span>
+                        </div>
+                        <button class="rounds-btn" id="increaseRounds">+</button>
+                    </div>
+                    <div class="rounds-progress">
+                        <div class="rounds-progress-text">
+                            <span>当前进度: </span>
+                            <span id="roundsProgress">0/5</span>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -5,8 +5,10 @@ const gameState = {
     aiScore: 0,
     drawScore: 0,
     currentRound: 0,
+    maxRounds: 5, // 默认5局
     lastGesture: null,
-    gameInterval: null
+    gameInterval: null,
+    difficulty: 'medium' // 默认中等难度: 'easy', 'medium', 'hard'
 };
 
 // DOM元素
@@ -22,6 +24,19 @@ const resultMessage = document.getElementById('resultMessage');
 const playerScore = document.getElementById('playerScore');
 const aiScore = document.getElementById('aiScore');
 const drawScore = document.getElementById('drawScore');
+const roundsValue = document.getElementById('roundsValue');
+const roundsProgress = document.getElementById('roundsProgress');
+const decreaseRoundsBtn = document.getElementById('decreaseRounds');
+const increaseRoundsBtn = document.getElementById('increaseRounds');
+const resultOverlay = document.getElementById('resultOverlay');
+const resultModal = document.getElementById('resultModal');
+const resultIcon = document.getElementById('resultIcon');
+const resultTitle = document.getElementById('resultTitle');
+const finalPlayerScore = document.getElementById('finalPlayerScore');
+const finalAiScore = document.getElementById('finalAiScore');
+const finalDrawScore = document.getElementById('finalDrawScore');
+const playAgainBtn = document.getElementById('playAgainBtn');
+const closeResultBtn = document.getElementById('closeResultBtn');
 
 // MediaPipe Hands配置（延迟初始化，等待库加载完成）
 let hands = null;
@@ -166,25 +181,49 @@ function getGestureEmoji(gesture) {
     return emojis[gesture] || '-';
 }
 
-// AI出拳（智能策略）
+// AI出拳（根据难度选择策略）
 function aiChoose() {
-    // 如果玩家有出拳记录，AI可以基于策略
-    // 这里使用随机策略，但可以改为更智能的策略
     const choices = ['rock', 'scissors', 'paper'];
+    const difficulty = gameState.difficulty;
     
-    // 简单策略：如果玩家连续出同样的手势，AI会出克制的手势
-    if (gameState.lastGesture && Math.random() > 0.3) {
-        // 30%的概率使用策略
-        if (gameState.lastGesture === 'rock') {
-            return 'paper'; // 布包石头
-        } else if (gameState.lastGesture === 'paper') {
-            return 'scissors'; // 剪刀剪布
-        } else if (gameState.lastGesture === 'scissors') {
-            return 'rock'; // 石头砸剪刀
-        }
+    // 简单难度：完全随机
+    if (difficulty === 'easy') {
+        return choices[Math.floor(Math.random() * choices.length)];
     }
     
-    // 70%的概率随机出拳
+    // 中等难度：20%概率克制玩家，80%随机
+    if (difficulty === 'medium') {
+        if (gameState.lastGesture && Math.random() < 0.2) {
+            // 20%的概率克制玩家
+            if (gameState.lastGesture === 'rock') {
+                return 'paper'; // 布包石头
+            } else if (gameState.lastGesture === 'paper') {
+                return 'scissors'; // 剪刀剪布
+            } else if (gameState.lastGesture === 'scissors') {
+                return 'rock'; // 石头砸剪刀
+            }
+        }
+        // 80%的概率随机出拳
+        return choices[Math.floor(Math.random() * choices.length)];
+    }
+    
+    // 困难难度：40%概率克制玩家，60%随机
+    if (difficulty === 'hard') {
+        if (gameState.lastGesture && Math.random() < 0.4) {
+            // 40%的概率克制玩家
+            if (gameState.lastGesture === 'rock') {
+                return 'paper'; // 布包石头
+            } else if (gameState.lastGesture === 'paper') {
+                return 'scissors'; // 剪刀剪布
+            } else if (gameState.lastGesture === 'scissors') {
+                return 'rock'; // 石头砸剪刀
+            }
+        }
+        // 60%的概率随机出拳
+        return choices[Math.floor(Math.random() * choices.length)];
+    }
+    
+    // 默认随机
     return choices[Math.floor(Math.random() * choices.length)];
 }
 
@@ -256,6 +295,101 @@ function playRound() {
     updateScores();
     
     gameState.currentRound++;
+    
+    // 更新进度显示
+    updateRoundsProgress();
+    
+    // 检查是否达到总局数
+    if (gameState.currentRound >= gameState.maxRounds) {
+        // 游戏结束，显示结算画面
+        endGame();
+    }
+}
+
+// 更新局数进度显示
+function updateRoundsProgress() {
+    roundsProgress.textContent = `${gameState.currentRound}/${gameState.maxRounds}`;
+}
+
+// 结束游戏并显示结算画面
+function endGame() {
+    // 停止游戏循环
+    if (gameState.gameInterval) {
+        clearInterval(gameState.gameInterval);
+        gameState.gameInterval = null;
+    }
+    
+    gameState.isRunning = false;
+    startBtn.textContent = '开始游戏';
+    updateStatus('游戏结束', '');
+    
+    // 判断最终胜负
+    const isWin = gameState.playerScore > gameState.aiScore;
+    const isDraw = gameState.playerScore === gameState.aiScore;
+    
+    // 显示结算画面
+    showResultScreen(isWin, isDraw);
+}
+
+// 显示结算画面
+function showResultScreen(isWin, isDraw) {
+    // 更新最终分数
+    finalPlayerScore.textContent = gameState.playerScore;
+    finalAiScore.textContent = gameState.aiScore;
+    finalDrawScore.textContent = gameState.drawScore;
+    
+    if (isWin) {
+        // 胜利画面
+        resultIcon.textContent = '🎉';
+        resultTitle.textContent = '恭喜获胜！';
+        resultModal.className = 'result-modal win';
+    } else if (isDraw) {
+        // 平局画面
+        resultIcon.textContent = '🤝';
+        resultTitle.textContent = '平局！';
+        resultModal.className = 'result-modal draw';
+    } else {
+        // 失败画面
+        resultIcon.textContent = '😢';
+        resultTitle.textContent = '很遗憾，你输了';
+        resultModal.className = 'result-modal lose';
+    }
+    
+    // 显示结算画面
+    resultOverlay.style.display = 'flex';
+    resultModal.classList.add('show');
+    
+    // 添加动画效果
+    setTimeout(() => {
+        resultModal.style.transform = 'scale(1)';
+        resultModal.style.opacity = '1';
+    }, 10);
+}
+
+// 关闭结算画面
+function closeResultScreen() {
+    resultModal.style.transform = 'scale(0.8)';
+    resultModal.style.opacity = '0';
+    setTimeout(() => {
+        resultOverlay.style.display = 'none';
+        resultModal.classList.remove('show');
+    }, 300);
+}
+
+// 再来一局
+function playAgain() {
+    closeResultScreen();
+    // 重置分数但保留设置
+    gameState.playerScore = 0;
+    gameState.aiScore = 0;
+    gameState.drawScore = 0;
+    gameState.currentRound = 0;
+    updateScores();
+    updateRoundsProgress();
+    resultMessage.textContent = '准备开始新游戏...';
+    resultMessage.className = 'result-message';
+    playerChoice.textContent = '-';
+    aiChoice.textContent = '-';
 }
 
 // 更新分数显示
@@ -672,6 +806,12 @@ async function startGame() {
     
     // 开始游戏
     gameState.isRunning = true;
+    gameState.currentRound = 0; // 重置局数
+    gameState.playerScore = 0;
+    gameState.aiScore = 0;
+    gameState.drawScore = 0;
+    updateScores();
+    updateRoundsProgress();
     startBtn.textContent = '停止游戏';
     updateStatus('游戏进行中...', 'active');
     resultMessage.textContent = '等待识别手势...';
@@ -695,16 +835,65 @@ function resetScores() {
     gameState.drawScore = 0;
     gameState.currentRound = 0;
     updateScores();
+    updateRoundsProgress();
     resultMessage.textContent = '分数已重置';
     resultMessage.className = 'result-message';
     playerChoice.textContent = '-';
     aiChoice.textContent = '-';
 }
 
+// 难度选择功能
+function setupDifficultySelector() {
+    const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+    
+    difficultyButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 移除所有活动状态
+            difficultyButtons.forEach(b => b.classList.remove('active'));
+            // 添加活动状态到当前按钮
+            btn.classList.add('active');
+            // 更新难度
+            gameState.difficulty = btn.dataset.difficulty;
+            console.log('难度已切换为:', gameState.difficulty);
+        });
+    });
+}
+
+// 局数调节功能
+function setupRoundsSelector() {
+    decreaseRoundsBtn.addEventListener('click', () => {
+        if (gameState.maxRounds > 1) {
+            gameState.maxRounds--;
+            roundsValue.textContent = gameState.maxRounds;
+            updateRoundsProgress();
+        }
+    });
+    
+    increaseRoundsBtn.addEventListener('click', () => {
+        if (gameState.maxRounds < 10) {
+            gameState.maxRounds++;
+            roundsValue.textContent = gameState.maxRounds;
+            updateRoundsProgress();
+        }
+    });
+}
+
 // 事件监听
 startBtn.addEventListener('click', startGame);
 resetBtn.addEventListener('click', resetScores);
+playAgainBtn.addEventListener('click', playAgain);
+closeResultBtn.addEventListener('click', closeResultScreen);
+
+// 点击遮罩关闭结算画面
+resultOverlay.addEventListener('click', (e) => {
+    if (e.target === resultOverlay) {
+        closeResultScreen();
+    }
+});
 
 // 初始化
 updateScores();
+updateRoundsProgress();
+setupDifficultySelector();
+setupRoundsSelector();
 

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI猜拳游戏</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 AI猜拳游戏</h1>
+            <p class="subtitle">实时手势识别 · 智能对战</p>
+        </header>
+
+        <div class="game-area">
+            <!-- 视频区域 -->
+            <div class="video-container">
+                <video id="video" autoplay playsinline muted></video>
+                <canvas id="canvas"></canvas>
+                <div class="video-overlay">
+                    <div class="status-indicator" id="statusIndicator">
+                        <span>准备中...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 游戏信息区域 -->
+            <div class="game-info">
+                <div class="score-board">
+                    <div class="score-item">
+                        <h3>玩家</h3>
+                        <div class="score" id="playerScore">0</div>
+                    </div>
+                    <div class="score-item">
+                        <h3>AI</h3>
+                        <div class="score" id="aiScore">0</div>
+                    </div>
+                    <div class="score-item">
+                        <h3>平局</h3>
+                        <div class="score" id="drawScore">0</div>
+                    </div>
+                </div>
+
+                <div class="round-info">
+                    <div class="round-display">
+                        <div class="player-choice">
+                            <h4>你的选择</h4>
+                            <div class="choice-icon" id="playerChoice">-</div>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="ai-choice">
+                            <h4>AI的选择</h4>
+                            <div class="choice-icon" id="aiChoice">-</div>
+                        </div>
+                    </div>
+                    <div class="result-message" id="resultMessage">等待开始...</div>
+                </div>
+
+                <div class="controls">
+                    <button id="startBtn" class="btn btn-primary">开始游戏</button>
+                    <button id="resetBtn" class="btn btn-secondary">重置分数</button>
+                </div>
+
+                <div class="instructions">
+                    <h4>游戏说明</h4>
+                    <ul>
+                        <li>点击"开始游戏"按钮启动摄像头</li>
+                        <li>首次使用需要允许浏览器访问摄像头权限</li>
+                        <li>将手放在摄像头前，做出石头、剪刀或布的手势</li>
+                        <li>系统会自动识别你的手势并与AI对战</li>
+                        <li>每3秒自动进行一局游戏</li>
+                    </ul>
+                    <div class="permission-tip" id="permissionTip" style="display: none;">
+                        <strong>💡 摄像头权限提示：</strong>
+                        <p>如果无法访问摄像头，请检查：</p>
+                        <ol>
+                            <li>点击地址栏左侧的摄像头图标，选择"允许"</li>
+                            <li>macOS: 系统偏好设置 > 安全性与隐私 > 摄像头 > 允许浏览器</li>
+                            <li>关闭其他使用摄像头的应用</li>
+                        </ol>
+                    </div>
+                    <div class="gesture-guide">
+                        <div class="gesture-item">
+                            <span class="gesture-emoji">✊</span>
+                            <span>石头</span>
+                        </div>
+                        <div class="gesture-item">
+                            <span class="gesture-emoji">✌️</span>
+                            <span>剪刀</span>
+                        </div>
+                        <div class="gesture-item">
+                            <span class="gesture-emoji">✋</span>
+                            <span>布</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="game.js"></script>
+</body>
+</html>
+

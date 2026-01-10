@@ -1,0 +1,22 @@
+{
+  "name": "ai-finger-guessing",
+  "version": "1.0.0",
+  "description": "基于手势识别的AI猜拳游戏",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080 -o",
+    "dev": "npx http-server -p 8080 -o"
+  },
+  "keywords": [
+    "猜拳",
+    "手势识别",
+    "MediaPipe",
+    "游戏"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
+

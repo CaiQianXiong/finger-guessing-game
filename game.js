@@ -6,37 +6,53 @@ const gameState = {
     drawScore: 0,
     currentRound: 0,
     maxRounds: 5, // 默认5局
+    gameIntervalSeconds: 3, // 默认3秒
     lastGesture: null,
     gameInterval: null,
     difficulty: 'medium' // 默认中等难度: 'easy', 'medium', 'hard'
 };
 
-// DOM元素
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const startBtn = document.getElementById('startBtn');
-const resetBtn = document.getElementById('resetBtn');
-const statusIndicator = document.getElementById('statusIndicator');
-const playerChoice = document.getElementById('playerChoice');
-const aiChoice = document.getElementById('aiChoice');
-const resultMessage = document.getElementById('resultMessage');
-const playerScore = document.getElementById('playerScore');
-const aiScore = document.getElementById('aiScore');
-const drawScore = document.getElementById('drawScore');
-const roundsValue = document.getElementById('roundsValue');
-const roundsProgress = document.getElementById('roundsProgress');
-const decreaseRoundsBtn = document.getElementById('decreaseRounds');
-const increaseRoundsBtn = document.getElementById('increaseRounds');
-const resultOverlay = document.getElementById('resultOverlay');
-const resultModal = document.getElementById('resultModal');
-const resultIcon = document.getElementById('resultIcon');
-const resultTitle = document.getElementById('resultTitle');
-const finalPlayerScore = document.getElementById('finalPlayerScore');
-const finalAiScore = document.getElementById('finalAiScore');
-const finalDrawScore = document.getElementById('finalDrawScore');
-const playAgainBtn = document.getElementById('playAgainBtn');
-const closeResultBtn = document.getElementById('closeResultBtn');
+// DOM元素（延迟获取，确保DOM已加载）
+let video, canvas, ctx, startBtn, resetBtn, statusIndicator;
+let playerChoice, aiChoice, resultMessage;
+let playerScore, aiScore, drawScore;
+let roundsValue, roundsProgress, decreaseRoundsBtn, increaseRoundsBtn;
+let intervalValue, decreaseIntervalBtn, increaseIntervalBtn;
+let resultOverlay, resultModal, resultIcon, resultTitle;
+let finalPlayerScore, finalAiScore, finalDrawScore;
+let playAgainBtn, closeResultBtn;
+
+// 获取DOM元素的函数
+function getDOMElements() {
+    video = document.getElementById('video');
+    canvas = document.getElementById('canvas');
+    ctx = canvas.getContext('2d');
+    startBtn = document.getElementById('startBtn');
+    resetBtn = document.getElementById('resetBtn');
+    statusIndicator = document.getElementById('statusIndicator');
+    playerChoice = document.getElementById('playerChoice');
+    aiChoice = document.getElementById('aiChoice');
+    resultMessage = document.getElementById('resultMessage');
+    playerScore = document.getElementById('playerScore');
+    aiScore = document.getElementById('aiScore');
+    drawScore = document.getElementById('drawScore');
+    roundsValue = document.getElementById('roundsValue');
+    roundsProgress = document.getElementById('roundsProgress');
+    decreaseRoundsBtn = document.getElementById('decreaseRounds');
+    increaseRoundsBtn = document.getElementById('increaseRounds');
+    intervalValue = document.getElementById('intervalValue');
+    decreaseIntervalBtn = document.getElementById('decreaseInterval');
+    increaseIntervalBtn = document.getElementById('increaseInterval');
+    resultOverlay = document.getElementById('resultOverlay');
+    resultModal = document.getElementById('resultModal');
+    resultIcon = document.getElementById('resultIcon');
+    resultTitle = document.getElementById('resultTitle');
+    finalPlayerScore = document.getElementById('finalPlayerScore');
+    finalAiScore = document.getElementById('finalAiScore');
+    finalDrawScore = document.getElementById('finalDrawScore');
+    playAgainBtn = document.getElementById('playAgainBtn');
+    closeResultBtn = document.getElementById('closeResultBtn');
+}
 
 // MediaPipe Hands配置（延迟初始化，等待库加载完成）
 let hands = null;
@@ -817,10 +833,11 @@ async function startGame() {
     resultMessage.textContent = '等待识别手势...';
     resultMessage.className = 'result-message';
     
-    // 每3秒进行一局
+    // 根据用户设置的间隔进行游戏
+    const intervalMs = gameState.gameIntervalSeconds * 1000;
     gameState.gameInterval = setInterval(() => {
         playRound();
-    }, 3000);
+    }, intervalMs);
     
     // 立即进行第一局（延迟1秒给用户准备时间）
     setTimeout(() => {
@@ -878,22 +895,122 @@ function setupRoundsSelector() {
     });
 }
 
-// 事件监听
-startBtn.addEventListener('click', startGame);
-resetBtn.addEventListener('click', resetScores);
-playAgainBtn.addEventListener('click', playAgain);
-closeResultBtn.addEventListener('click', closeResultScreen);
-
-// 点击遮罩关闭结算画面
-resultOverlay.addEventListener('click', (e) => {
-    if (e.target === resultOverlay) {
-        closeResultScreen();
+// 游戏间隔调节功能
+function setupIntervalSelector() {
+    // 获取元素
+    const decreaseBtn = document.getElementById('decreaseInterval');
+    const increaseBtn = document.getElementById('increaseInterval');
+    const valueDisplay = document.getElementById('intervalValue');
+    
+    // 确保元素存在
+    if (!decreaseBtn || !increaseBtn || !valueDisplay) {
+        console.error('❌ 间隔选择器元素未找到:', {
+            decreaseBtn: !!decreaseBtn,
+            increaseBtn: !!increaseBtn,
+            valueDisplay: !!valueDisplay
+        });
+        // 延迟重试
+        setTimeout(setupIntervalSelector, 100);
+        return;
     }
-});
+    
+    // 更新全局引用
+    decreaseIntervalBtn = decreaseBtn;
+    increaseIntervalBtn = increaseBtn;
+    intervalValue = valueDisplay;
+    
+    // 先移除所有旧的事件监听器（通过克隆节点）
+    const newDecreaseBtn = decreaseBtn.cloneNode(true);
+    const newIncreaseBtn = increaseBtn.cloneNode(true);
+    decreaseBtn.parentNode.replaceChild(newDecreaseBtn, decreaseBtn);
+    increaseBtn.parentNode.replaceChild(newIncreaseBtn, increaseBtn);
+    
+    // 更新引用
+    decreaseIntervalBtn = newDecreaseBtn;
+    increaseIntervalBtn = newIncreaseBtn;
+    
+    // 绑定事件监听器（使用onclick确保直接绑定）
+    decreaseIntervalBtn.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.cancelBubble = true;
+        
+        console.log('🔽 点击减少按钮，当前值:', gameState.gameIntervalSeconds);
+        
+        if (gameState.gameIntervalSeconds > 2) {
+            gameState.gameIntervalSeconds--;
+            const valueEl = document.getElementById('intervalValue');
+            if (valueEl) {
+                valueEl.textContent = gameState.gameIntervalSeconds;
+                console.log('✅ 游戏间隔设置为:', gameState.gameIntervalSeconds, '秒');
+            } else {
+                console.error('❌ intervalValue元素未找到');
+            }
+        } else {
+            console.log('⚠️ 游戏间隔已达到最小值2秒');
+        }
+        return false;
+    };
+    
+    increaseIntervalBtn.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.cancelBubble = true;
+        
+        console.log('🔼 点击增加按钮，当前值:', gameState.gameIntervalSeconds);
+        
+        if (gameState.gameIntervalSeconds < 10) {
+            gameState.gameIntervalSeconds++;
+            const valueEl = document.getElementById('intervalValue');
+            if (valueEl) {
+                valueEl.textContent = gameState.gameIntervalSeconds;
+                console.log('✅ 游戏间隔设置为:', gameState.gameIntervalSeconds, '秒');
+            } else {
+                console.error('❌ intervalValue元素未找到');
+            }
+        } else {
+            console.log('⚠️ 游戏间隔已达到最大值10秒');
+        }
+        return false;
+    };
+    
+    // 初始化显示值
+    valueDisplay.textContent = gameState.gameIntervalSeconds;
+    console.log('✅ 游戏间隔选择器初始化完成，当前值:', gameState.gameIntervalSeconds);
+}
+
+// 初始化函数
+function initializeGame() {
+    // 确保DOM已加载
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeGame);
+        return;
+    }
+    
+    // 获取DOM元素
+    getDOMElements();
+    
+    // 初始化其他功能
+    updateScores();
+    updateRoundsProgress();
+    setupDifficultySelector();
+    setupRoundsSelector();
+    setupIntervalSelector();
+    
+    // 绑定其他事件
+    startBtn.addEventListener('click', startGame);
+    resetBtn.addEventListener('click', resetScores);
+    playAgainBtn.addEventListener('click', playAgain);
+    closeResultBtn.addEventListener('click', closeResultScreen);
+    
+    // 点击遮罩关闭结算画面
+    resultOverlay.addEventListener('click', (e) => {
+        if (e.target === resultOverlay) {
+            closeResultScreen();
+        }
+    });
+}
 
 // 初始化
-updateScores();
-updateRoundsProgress();
-setupDifficultySelector();
-setupRoundsSelector();
+initializeGame();
 

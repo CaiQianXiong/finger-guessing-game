@@ -50,6 +50,7 @@ header h1 {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 100%;
 }
 
 .video-container {
@@ -278,12 +279,26 @@ header h1 {
     opacity: 0.9;
 }
 
+.game-settings {
+    display: flex;
+    flex-direction: row; /* 明确指定横向排列 */
+    gap: 15px;
+    margin-top: 10px;
+    align-items: stretch;
+    width: 100%;
+}
+
 .rounds-selector {
+    flex: 1;
     background: #f9f9f9;
     padding: 15px;
     border-radius: 15px;
     border-left: 4px solid #667eea;
-    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* 确保flex子元素可以收缩 */
+    height: 100%; /* 确保两个选择器高度一致 */
+    justify-content: space-between; /* 内容均匀分布 */
 }
 
 .rounds-selector h4 {
@@ -291,6 +306,7 @@ header h1 {
     color: #333;
     font-size: 0.9rem;
     text-align: center;
+    flex-shrink: 0; /* 防止标题收缩 */
 }
 
 .rounds-control {
@@ -299,6 +315,7 @@ header h1 {
     justify-content: center;
     gap: 15px;
     margin-bottom: 10px;
+    flex-shrink: 0; /* 防止收缩 */
 }
 
 .rounds-btn {
@@ -315,6 +332,11 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    z-index: 1;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: auto;
 }
 
 .rounds-btn:hover {
@@ -348,7 +370,8 @@ header h1 {
 
 .rounds-progress {
     text-align: center;
-    margin-top: 10px;
+    margin-top: 0;
+    flex-shrink: 0; /* 防止收缩 */
 }
 
 .rounds-progress-text {
@@ -751,6 +774,11 @@ header h1 {
     
     .result-btn {
         width: 100%;
+    }
+    
+    /* 只在移动端（600px以下）才垂直排列 */
+    .game-settings {
+        flex-direction: column !important;
     }
 }
 

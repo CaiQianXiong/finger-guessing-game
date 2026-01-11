@@ -76,21 +76,42 @@
                     </div>
                 </div>
                 
-                <!-- 局数选择 -->
-                <div class="rounds-selector">
-                    <h4>游戏局数</h4>
-                    <div class="rounds-control">
-                        <button class="rounds-btn" id="decreaseRounds">-</button>
-                        <div class="rounds-display">
-                            <span id="roundsValue">5</span>
-                            <span class="rounds-label">局</span>
+                <!-- 游戏设置：局数和间隔 -->
+                <div class="game-settings">
+                    <!-- 局数选择 -->
+                    <div class="rounds-selector">
+                        <h4>游戏局数</h4>
+                        <div class="rounds-control">
+                            <button class="rounds-btn" id="decreaseRounds">-</button>
+                            <div class="rounds-display">
+                                <span id="roundsValue">5</span>
+                                <span class="rounds-label">局</span>
+                            </div>
+                            <button class="rounds-btn" id="increaseRounds">+</button>
                         </div>
-                        <button class="rounds-btn" id="increaseRounds">+</button>
+                        <div class="rounds-progress">
+                            <div class="rounds-progress-text">
+                                <span>当前进度: </span>
+                                <span id="roundsProgress">0/5</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="rounds-progress">
-                        <div class="rounds-progress-text">
-                            <span>当前进度: </span>
-                            <span id="roundsProgress">0/5</span>
+                    
+                    <!-- 游戏间隔选择 -->
+                    <div class="rounds-selector">
+                        <h4>游戏间隔</h4>
+                        <div class="rounds-control">
+                            <button class="rounds-btn" id="decreaseInterval">-</button>
+                            <div class="rounds-display">
+                                <span id="intervalValue">3</span>
+                                <span class="rounds-label">秒</span>
+                            </div>
+                            <button class="rounds-btn" id="increaseInterval">+</button>
+                        </div>
+                        <div class="rounds-progress">
+                            <div class="rounds-progress-text">
+                                <span>每局间隔</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -140,7 +161,7 @@
                         <li>首次使用需要允许浏览器访问摄像头权限</li>
                         <li>将手放在摄像头前，做出石头、剪刀或布的手势</li>
                         <li>系统会自动识别你的手势并与AI对战</li>
-                        <li>每3秒自动进行一局游戏</li>
+                        <li>默认每3秒自动进行一局游戏</li>
                     </ul>
                     <div class="permission-tip" id="permissionTip" style="display: none;">
                         <strong>💡 摄像头权限提示：</strong>
